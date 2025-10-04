@@ -63,6 +63,16 @@
         return saved === 'true';
       });
 
+      const [fixedPoints, setFixedPoints] = useState(() => {
+        const saved = localStorage.getItem('padelFixedPoints');
+        return saved === 'true';
+      });
+
+      const [pointsPerGame, setPointsPerGame] = useState(() => {
+        const saved = localStorage.getItem('padelPointsPerGame');
+        return saved ? parseInt(saved) : 6;
+      });
+
       const [activeTab, setActiveTab] = useState(() => {
         const saved = localStorage.getItem('padelActiveTab');
         const tournamentSaved = localStorage.getItem('padelTournamentStarted');
