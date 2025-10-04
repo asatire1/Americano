@@ -148,16 +148,27 @@
         return schedules[n] || schedules[6];
       };
 
-      const rounds = generateSchedule(numPlayers);
-      
       const [scores, setScores] = useState(() => {
         const saved = localStorage.getItem('padelScores');
-        return saved ? JSON.parse(saved) : Array(numPlayers).fill(0);
+        const savedNumPlayers = localStorage.getItem('padelNumPlayers');
+        if (saved && savedNumPlayers && parseInt(savedNumPlayers) === numPlayers) {
+          return JSON.parse(saved);
+        }
+        return Array(numPlayers).fill(0);
       });
+      
+      const rounds = generateSchedule(numPlayers);
       
       const [roundScores, setRoundScores] = useState(() => {
         const saved = localStorage.getItem('padelRoundScores');
-        return saved ? JSON.parse(saved) : rounds.map(() => ({ team1: '', team2: '' }));
+        const savedNumPlayers = localStorage.getItem('padelNumPlayers');
+        if (saved && savedNumPlayers && parseInt(savedNumPlayers) === numPlayers) {
+          const parsedScores = JSON.parse(saved);
+          if (parsedScores.length === rounds.length) {
+            return parsedScores;
+          }
+        }
+        return rounds.map(() => ({ team1: '', team2: '' }));
       });
 
       // Auto-save whenever state changes
