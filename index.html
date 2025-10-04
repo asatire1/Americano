@@ -40,15 +40,22 @@
     );
 
     const AmericanoTournament = () => {
+      // Load from localStorage or use defaults
       const [numPlayers, setNumPlayers] = useState(() => {
         const saved = localStorage.getItem('padelNumPlayers');
         return saved ? parseInt(saved) : 6;
       });
+      
       const [players, setPlayers] = useState(() => {
         const saved = localStorage.getItem('padelPlayers');
         return saved ? JSON.parse(saved) : ['Player 1', 'Player 2', 'Player 3', 'Player 4', 'Player 5', 'Player 6'];
       });
-      const [activeTab, setActiveTab] = useState('settings');
+      
+      const [activeTab, setActiveTab] = useState(() => {
+        const saved = localStorage.getItem('padelActiveTab');
+        return saved || 'settings';
+      });
+      
       const [tournamentStarted, setTournamentStarted] = useState(() => {
         const saved = localStorage.getItem('padelTournamentStarted');
         return saved === 'true';
@@ -142,16 +149,18 @@
       };
 
       const rounds = generateSchedule(numPlayers);
+      
       const [scores, setScores] = useState(() => {
         const saved = localStorage.getItem('padelScores');
         return saved ? JSON.parse(saved) : Array(numPlayers).fill(0);
       });
+      
       const [roundScores, setRoundScores] = useState(() => {
         const saved = localStorage.getItem('padelRoundScores');
         return saved ? JSON.parse(saved) : rounds.map(() => ({ team1: '', team2: '' }));
       });
 
-      // Auto-save to localStorage whenever data changes
+      // Auto-save whenever state changes
       useEffect(() => {
         localStorage.setItem('padelNumPlayers', numPlayers.toString());
       }, [numPlayers]);
@@ -169,6 +178,10 @@
       }, [roundScores]);
 
       useEffect(() => {
+        localStorage.setItem('padelActiveTab', activeTab);
+      }, [activeTab]);
+
+      useEffect(() => {
         localStorage.setItem('padelTournamentStarted', tournamentStarted.toString());
       }, [tournamentStarted]);
 
@@ -180,10 +193,6 @@
         setScores(Array(numPlayers).fill(0));
         setRoundScores(rounds.map(() => ({ team1: '', team2: '' })));
         setTournamentStarted(false);
-        // Clear saved scores when changing player count
-        localStorage.removeItem('padelScores');
-        localStorage.removeItem('padelRoundScores');
-        localStorage.setItem('padelTournamentStarted', 'false');
       }, [numPlayers]);
 
       const handleNameChange = (idx, newName) => {
@@ -218,17 +227,18 @@
       };
 
       const resetScores = () => {
-        const newScores = Array(numPlayers).fill(0);
-        const newRoundScores = rounds.map(() => ({ team1: '', team2: '' }));
-        setScores(newScores);
-        setRoundScores(newRoundScores);
-        localStorage.setItem('padelScores', JSON.stringify(newScores));
-        localStorage.setItem('padelRoundScores', JSON.stringify(newRoundScores));
+        setScores(Array(numPlayers).fill(0));
+        setRoundScores(rounds.map(() => ({ team1: '', team2: '' })));
       };
 
       const clearAllData = () => {
-        if (confirm('Are you sure you want to clear ALL tournament data? This cannot be undone.')) {
-          localStorage.clear();
+        if (confirm('Are you sure you want to clear ALL saved data and start fresh?')) {
+          localStorage.removeItem('padelNumPlayers');
+          localStorage.removeItem('padelPlayers');
+          localStorage.removeItem('padelScores');
+          localStorage.removeItem('padelRoundScores');
+          localStorage.removeItem('padelActiveTab');
+          localStorage.removeItem('padelTournamentStarted');
           window.location.reload();
         }
       };
@@ -316,7 +326,7 @@
                 <h1 className="text-3xl md:text-4xl font-bold text-gray-800">Americano Padel Tournament</h1>
               </div>
               <p className="text-gray-600">
-                {numPlayers} Players • {configs[numPlayers].rounds} Rounds • All partnerships covered!
+                {numPlayers} Players • {configs[numPlayers].rounds} Rounds • Auto-saved!
               </p>
             </div>
 
@@ -412,22 +422,12 @@
                   Start Tournament →
                 </button>
 
-                <div className="bg-green-50 border border-green-300 rounded-lg p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-2xl">💾</span>
-                    <h3 className="font-semibold text-green-900">Auto-Save Enabled</h3>
-                  </div>
-                  <p className="text-sm text-green-800">
-                    All your data is automatically saved to your browser. You can close Safari and come back anytime - your tournament will be right where you left it!
+                <div className="bg-white border-2 border-blue-300 rounded-lg p-6">
+                  <h3 className="font-semibold text-gray-900 mb-4">💾 Backup & Data</h3>
+                  <p className="text-sm text-gray-600 mb-4">
+                    ✅ Your tournament auto-saves automatically! You can close the browser and come back anytime.
                   </p>
-                </div>
-
-                {tournamentStarted && (
-                  <div className="bg-white border-2 border-blue-300 rounded-lg p-6">
-                    <h3 className="font-semibold text-gray-900 mb-4">💾 Save/Load Progress</h3>
-                    <p className="text-sm text-gray-600 mb-4">
-                      Download a backup file or restore from a previous save.
-                    </p>
+                  <div className="space-y-3">
                     <div className="flex gap-3">
                       <button
                         onClick={downloadProgress}
@@ -447,20 +447,13 @@
                         </div>
                       </label>
                     </div>
+                    <button
+                      onClick={clearAllData}
+                      className="w-full bg-gray-500 text-white px-4 py-3 rounded-lg font-medium hover:bg-gray-600 transition-colors"
+                    >
+                      🗑️ Clear All Data & Start Fresh
+                    </button>
                   </div>
-                )}
-
-                <div className="bg-red-50 border border-red-300 rounded-lg p-4">
-                  <h3 className="font-semibold text-red-900 mb-2">⚠️ Reset Everything</h3>
-                  <p className="text-sm text-red-800 mb-3">
-                    Clear all saved data and start completely fresh.
-                  </p>
-                  <button
-                    onClick={clearAllData}
-                    className="w-full bg-red-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-red-700 transition-colors"
-                  >
-                    Clear All Data
-                  </button>
                 </div>
               </div>
             )}
@@ -473,15 +466,12 @@
                       <Award size={24} className="text-yellow-600" />
                       Leaderboard
                     </h2>
-                    <div className="flex items-center gap-3">
-                      <span className="text-xs text-green-600 font-medium">💾 Auto-saved</span>
-                      <button
-                        onClick={downloadProgress}
-                        className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-colors text-sm"
-                      >
-                        📥 Backup
-                      </button>
-                    </div>
+                    <button
+                      onClick={downloadProgress}
+                      className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-colors text-sm"
+                    >
+                      💾 Download Backup
+                    </button>
                   </div>
                   <div className="space-y-2">
                     {sortedPlayers.map((player, position) => (
@@ -573,10 +563,16 @@
                   </div>
                 </div>
 
+                <div className="mt-6 bg-green-100 border border-green-300 rounded-lg p-4">
+                  <h3 className="font-semibold text-green-900 mb-2">✅ Auto-Save Active!</h3>
+                  <p className="text-sm text-green-800">
+                    All changes are automatically saved. You can close your browser and return anytime - your tournament will be exactly as you left it!
+                  </p>
+                </div>
+
                 <div className="mt-6 bg-blue-100 border border-blue-300 rounded-lg p-4">
                   <h3 className="font-semibold text-blue-900 mb-2">Tournament Info:</h3>
                   <ul className="text-sm text-blue-800 space-y-1">
-                    <li>• 💾 <strong>Auto-save enabled</strong> - all data saved automatically, even if you close Safari!</li>
                     <li>• Enter the final score for each team after the match ends (2v2 format)</li>
                     <li>• Click "Save Score" to add points to each player's total</li>
                     <li>• ✓ Every player partners with every other player at least once</li>
