@@ -40,7 +40,7 @@
     );
 
     const AmericanoTournament = () => {
-      // Load from localStorage or use defaults
+      // Load initial state from localStorage
       const [numPlayers, setNumPlayers] = useState(() => {
         const saved = localStorage.getItem('padelNumPlayers');
         return saved ? parseInt(saved) : 6;
@@ -48,7 +48,14 @@
       
       const [players, setPlayers] = useState(() => {
         const saved = localStorage.getItem('padelPlayers');
-        return saved ? JSON.parse(saved) : ['Player 1', 'Player 2', 'Player 3', 'Player 4', 'Player 5', 'Player 6'];
+        if (saved) {
+          try {
+            return JSON.parse(saved);
+          } catch (e) {
+            console.error('Error loading players:', e);
+          }
+        }
+        return Array.from({ length: 6 }, (_, i) => `Player ${i + 1}`);
       });
       
       const [tournamentStarted, setTournamentStarted] = useState(() => {
@@ -59,11 +66,34 @@
       const [activeTab, setActiveTab] = useState(() => {
         const saved = localStorage.getItem('padelActiveTab');
         const tournamentSaved = localStorage.getItem('padelTournamentStarted');
-        // If tournament was started, restore to tournament tab
         if (tournamentSaved === 'true') {
-          return saved || 'tournament';
+          return 'tournament';
         }
         return saved || 'settings';
+      });
+
+      const [scores, setScores] = useState(() => {
+        const saved = localStorage.getItem('padelScores');
+        if (saved) {
+          try {
+            return JSON.parse(saved);
+          } catch (e) {
+            console.error('Error loading scores:', e);
+          }
+        }
+        return Array(6).fill(0);
+      });
+      
+      const [roundScores, setRoundScores] = useState(() => {
+        const saved = localStorage.getItem('padelRoundScores');
+        if (saved) {
+          try {
+            return JSON.parse(saved);
+          } catch (e) {
+            console.error('Error loading round scores:', e);
+          }
+        }
+        return [];
       });
       
       const configs = {
@@ -153,30 +183,17 @@
         return schedules[n] || schedules[6];
       };
 
-      const [scores, setScores] = useState(() => {
-        const saved = localStorage.getItem('padelScores');
-        const savedNumPlayers = localStorage.getItem('padelNumPlayers');
-        if (saved && savedNumPlayers && parseInt(savedNumPlayers) === numPlayers) {
-          return JSON.parse(saved);
-        }
-        return Array(numPlayers).fill(0);
-      });
-      
       const rounds = generateSchedule(numPlayers);
-      
-      const [roundScores, setRoundScores] = useState(() => {
-        const saved = localStorage.getItem('padelRoundScores');
-        const savedNumPlayers = localStorage.getItem('padelNumPlayers');
-        if (saved && savedNumPlayers && parseInt(savedNumPlayers) === numPlayers) {
-          const parsedScores = JSON.parse(saved);
-          if (parsedScores.length === rounds.length) {
-            return parsedScores;
-          }
-        }
-        return rounds.map(() => ({ team1: '', team2: '' }));
-      });
 
-      // Auto-save whenever state changes
+      // Initialize roundScores if empty
+      useEffect(() => {
+        if (roundScores.length === 0 || roundScores.length !== rounds.length) {
+          const newRoundScores = rounds.map(() => ({ team1: '', team2: '' }));
+          setRoundScores(newRoundScores);
+        }
+      }, [rounds.length]);
+
+      // Auto-save to localStorage
       useEffect(() => {
         localStorage.setItem('padelNumPlayers', numPlayers.toString());
       }, [numPlayers]);
@@ -201,28 +218,29 @@
         localStorage.setItem('padelTournamentStarted', tournamentStarted.toString());
       }, [tournamentStarted]);
 
-      useEffect(() => {
-        const newPlayers = Array.from({ length: numPlayers }, (_, i) => 
-          players[i] || `Player ${i + 1}`
-        );
-        setPlayers(newPlayers);
-        setScores(Array(numPlayers).fill(0));
-        setRoundScores(rounds.map(() => ({ team1: '', team2: '' })));
-        setTournamentStarted(false);
-      }, [numPlayers]);
-
       const handleNameChange = (idx, newName) => {
         const newPlayers = [...players];
         newPlayers[idx] = newName;
         setPlayers(newPlayers);
       };
 
+      const handlePlayerCountChange = (newCount) => {
+        if (confirm('Changing player count will reset all scores. Continue?')) {
+          setNumPlayers(newCount);
+          const newPlayers = Array.from({ length: newCount }, (_, i) => `Player ${i + 1}`);
+          setPlayers(newPlayers);
+          setScores(Array(newCount).fill(0));
+          const newRounds = generateSchedule(newCount);
+          setRoundScores(newRounds.map(() => ({ team1: '', team2: '' })));
+          setTournamentStarted(false);
+          setActiveTab('settings');
+        }
+      };
+
       const handleScoreChange = (roundIdx, team, value) => {
         const newRoundScores = [...roundScores];
-        newRoundScores[roundIdx][team] = value;
+        newRoundScores[roundIdx] = { ...newRoundScores[roundIdx], [team]: value };
         setRoundScores(newRoundScores);
-        // Auto-save immediately
-        localStorage.setItem('padelRoundScores', JSON.stringify(newRoundScores));
       };
 
       const saveRoundScore = (roundIdx) => {
@@ -242,23 +260,18 @@
         });
         
         setScores(newScores);
-        // Auto-save immediately
-        localStorage.setItem('padelScores', JSON.stringify(newScores));
       };
 
       const resetScores = () => {
-        setScores(Array(numPlayers).fill(0));
-        setRoundScores(rounds.map(() => ({ team1: '', team2: '' })));
+        if (confirm('Reset all scores? This cannot be undone.')) {
+          setScores(Array(numPlayers).fill(0));
+          setRoundScores(rounds.map(() => ({ team1: '', team2: '' })));
+        }
       };
 
       const clearAllData = () => {
         if (confirm('Are you sure you want to clear ALL saved data and start fresh?')) {
-          localStorage.removeItem('padelNumPlayers');
-          localStorage.removeItem('padelPlayers');
-          localStorage.removeItem('padelScores');
-          localStorage.removeItem('padelRoundScores');
-          localStorage.removeItem('padelActiveTab');
-          localStorage.removeItem('padelTournamentStarted');
+          localStorage.clear();
           window.location.reload();
         }
       };
@@ -278,7 +291,7 @@
         const url = URL.createObjectURL(dataBlob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `padel-tournament-${numPlayers}players-${new Date().toISOString().split('T')[0]}.json`;
+        link.download = `padel-tournament-${new Date().toISOString().split('T')[0]}.json`;
         link.click();
         URL.revokeObjectURL(url);
       };
@@ -290,17 +303,15 @@
         const reader = new FileReader();
         reader.onload = (e) => {
           try {
-            const tournamentData = JSON.parse(e.target.result);
-            
-            setNumPlayers(tournamentData.numPlayers);
-            setPlayers(tournamentData.players);
-            setScores(tournamentData.scores);
-            setRoundScores(tournamentData.roundScores);
-            setTournamentStarted(tournamentData.tournamentStarted);
-            
-            alert('Tournament progress restored successfully!');
+            const data = JSON.parse(e.target.result);
+            setNumPlayers(data.numPlayers);
+            setPlayers(data.players);
+            setScores(data.scores);
+            setRoundScores(data.roundScores);
+            setTournamentStarted(data.tournamentStarted);
+            alert('Tournament restored successfully!');
           } catch (error) {
-            alert('Error loading file. Please make sure it is a valid tournament save file.');
+            alert('Error loading file. Please use a valid save file.');
           }
         };
         reader.readAsText(file);
@@ -394,7 +405,7 @@
                       {[5, 6, 7, 8, 9].map(n => (
                         <button
                           key={n}
-                          onClick={() => setNumPlayers(n)}
+                          onClick={() => handlePlayerCountChange(n)}
                           className={`flex-1 px-4 py-3 rounded-lg font-semibold transition-colors ${
                             numPlayers === n
                               ? 'bg-blue-600 text-white shadow-lg'
@@ -408,8 +419,8 @@
                     <div className="mt-3 p-3 bg-blue-50 rounded-lg">
                       <p className="text-sm text-blue-800">
                         <strong>{configs[numPlayers].rounds} rounds</strong> • 
-                        <strong>{configs[numPlayers].gamesPerPlayer} games</strong> per player • 
-                        <strong>All partnerships covered!</strong>
+                        <strong> {configs[numPlayers].gamesPerPlayer} games</strong> per player • 
+                        <strong> All partnerships covered!</strong>
                       </p>
                     </div>
                   </div>
@@ -417,7 +428,6 @@
 
                 <div className="bg-white rounded-lg shadow-lg p-6">
                   <h2 className="text-xl font-semibold mb-4">Player Names</h2>
-                  <p className="text-gray-600 mb-6">Enter the names of all players participating in the tournament.</p>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {players.map((player, idx) => (
                       <div key={idx} className="bg-blue-50 rounded-lg p-4">
@@ -428,7 +438,7 @@
                           type="text"
                           value={player}
                           onChange={(e) => handleNameChange(idx, e.target.value)}
-                          className="w-full px-4 py-3 border-2 border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-medium text-gray-700"
+                          className="w-full px-4 py-3 border-2 border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                       </div>
                     ))}
@@ -444,14 +454,11 @@
 
                 <div className="bg-white border-2 border-blue-300 rounded-lg p-6">
                   <h3 className="font-semibold text-gray-900 mb-4">💾 Backup & Data</h3>
-                  <p className="text-sm text-gray-600 mb-4">
-                    ✅ Your tournament auto-saves automatically! You can close the browser and come back anytime.
-                  </p>
                   <div className="space-y-3">
                     <div className="flex gap-3">
                       <button
                         onClick={downloadProgress}
-                        className="flex-1 bg-green-600 text-white px-4 py-3 rounded-lg font-medium hover:bg-green-700 transition-colors"
+                        className="flex-1 bg-green-600 text-white px-4 py-3 rounded-lg font-medium hover:bg-green-700"
                       >
                         📥 Download Backup
                       </button>
@@ -462,16 +469,16 @@
                           onChange={uploadProgress}
                           className="hidden"
                         />
-                        <div className="bg-blue-600 text-white px-4 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors text-center cursor-pointer">
+                        <div className="bg-blue-600 text-white px-4 py-3 rounded-lg font-medium hover:bg-blue-700 text-center cursor-pointer">
                           📤 Upload Backup
                         </div>
                       </label>
                     </div>
                     <button
                       onClick={clearAllData}
-                      className="w-full bg-gray-500 text-white px-4 py-3 rounded-lg font-medium hover:bg-gray-600 transition-colors"
+                      className="w-full bg-red-500 text-white px-4 py-3 rounded-lg font-medium hover:bg-red-600"
                     >
-                      🗑️ Clear All Data & Start Fresh
+                      🗑️ Clear All Data
                     </button>
                   </div>
                 </div>
@@ -481,18 +488,10 @@
             {activeTab === 'tournament' && tournamentStarted && (
               <>
                 <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-xl font-semibold flex items-center gap-2">
-                      <Award size={24} className="text-yellow-600" />
-                      Leaderboard
-                    </h2>
-                    <button
-                      onClick={downloadProgress}
-                      className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-colors text-sm"
-                    >
-                      💾 Download Backup
-                    </button>
-                  </div>
+                  <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                    <Award size={24} className="text-yellow-600" />
+                    Leaderboard
+                  </h2>
                   <div className="space-y-2">
                     {sortedPlayers.map((player, position) => (
                       <div 
@@ -512,16 +511,13 @@
                           <span className="text-xl font-bold text-blue-600">
                             {(numPlayers === 7 || numPlayers === 9) ? player.normalizedScore.toFixed(1) : player.score}
                           </span>
-                          {(numPlayers === 7 || numPlayers === 9) && player.score !== player.normalizedScore && (
-                            <div className="text-xs text-gray-500">({player.score} raw)</div>
-                          )}
                         </div>
                       </div>
                     ))}
                   </div>
                   <button
                     onClick={resetScores}
-                    className="mt-4 w-full bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors"
+                    className="mt-4 w-full bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
                   >
                     Reset All Scores
                   </button>
@@ -533,9 +529,9 @@
                     {rounds.map((round, idx) => (
                       <div 
                         key={idx}
-                        className="border-2 rounded-lg p-4 bg-gray-50 border-gray-200"
+                        className="border-2 rounded-lg p-4 bg-gray-50"
                       >
-                        <div className="font-bold text-lg text-gray-700 mb-3">Round {idx + 1}</div>
+                        <div className="font-bold text-lg mb-3">Round {idx + 1}</div>
                         
                         <div className="grid md:grid-cols-2 gap-4 mb-3">
                           <div className="bg-white rounded p-3">
@@ -546,7 +542,7 @@
                               type="number"
                               min="0"
                               placeholder="Score"
-                              value={roundScores[idx].team1}
+                              value={roundScores[idx]?.team1 || ''}
                               onChange={(e) => handleScoreChange(idx, 'team1', e.target.value)}
                               className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
@@ -560,7 +556,7 @@
                               type="number"
                               min="0"
                               placeholder="Score"
-                              value={roundScores[idx].team2}
+                              value={roundScores[idx]?.team2 || ''}
                               onChange={(e) => handleScoreChange(idx, 'team2', e.target.value)}
                               className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
                             />
@@ -573,7 +569,7 @@
                           </div>
                           <button
                             onClick={() => saveRoundScore(idx)}
-                            className="bg-blue-600 text-white px-6 py-2 rounded font-medium hover:bg-blue-700 transition-colors"
+                            className="bg-blue-600 text-white px-6 py-2 rounded font-medium hover:bg-blue-700"
                           >
                             Save Score
                           </button>
@@ -586,25 +582,8 @@
                 <div className="mt-6 bg-green-100 border border-green-300 rounded-lg p-4">
                   <h3 className="font-semibold text-green-900 mb-2">✅ Auto-Save Active!</h3>
                   <p className="text-sm text-green-800">
-                    All changes are automatically saved. You can close your browser and return anytime - your tournament will be exactly as you left it!
+                    All changes save automatically. Close your browser and come back anytime!
                   </p>
-                </div>
-
-                <div className="mt-6 bg-blue-100 border border-blue-300 rounded-lg p-4">
-                  <h3 className="font-semibold text-blue-900 mb-2">Tournament Info:</h3>
-                  <ul className="text-sm text-blue-800 space-y-1">
-                    <li>• Enter the final score for each team after the match ends (2v2 format)</li>
-                    <li>• Click "Save Score" to add points to each player's total</li>
-                    <li>• ✓ Every player partners with every other player at least once</li>
-                    <li>• ✓ Game balance: {configs[numPlayers].gamesPerPlayer} games per player ({configs[numPlayers].balance})</li>
-                    {numPlayers === 7 && (
-                      <li>• 📊 Scores are automatically normalized: players with 9 games have scores adjusted by 8/9 for fairness</li>
-                    )}
-                    {numPlayers === 9 && (
-                      <li>• 📊 Scores are automatically normalized: players with 8 games have scores adjusted by 7/8 for fairness</li>
-                    )}
-                    <li>• The leaderboard updates automatically to show rankings</li>
-                  </ul>
                 </div>
               </>
             )}
