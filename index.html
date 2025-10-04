@@ -51,14 +51,19 @@
         return saved ? JSON.parse(saved) : ['Player 1', 'Player 2', 'Player 3', 'Player 4', 'Player 5', 'Player 6'];
       });
       
-      const [activeTab, setActiveTab] = useState(() => {
-        const saved = localStorage.getItem('padelActiveTab');
-        return saved || 'settings';
-      });
-      
       const [tournamentStarted, setTournamentStarted] = useState(() => {
         const saved = localStorage.getItem('padelTournamentStarted');
         return saved === 'true';
+      });
+
+      const [activeTab, setActiveTab] = useState(() => {
+        const saved = localStorage.getItem('padelActiveTab');
+        const tournamentSaved = localStorage.getItem('padelTournamentStarted');
+        // If tournament was started, restore to tournament tab
+        if (tournamentSaved === 'true') {
+          return saved || 'tournament';
+        }
+        return saved || 'settings';
       });
       
       const configs = {
@@ -237,10 +242,8 @@
         });
         
         setScores(newScores);
-        
-        // Immediately save to localStorage
+        // Auto-save immediately
         localStorage.setItem('padelScores', JSON.stringify(newScores));
-        localStorage.setItem('padelRoundScores', JSON.stringify(roundScores));
       };
 
       const resetScores = () => {
