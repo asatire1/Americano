@@ -216,6 +216,8 @@
         const newRoundScores = [...roundScores];
         newRoundScores[roundIdx][team] = value;
         setRoundScores(newRoundScores);
+        // Auto-save immediately
+        localStorage.setItem('padelRoundScores', JSON.stringify(newRoundScores));
       };
 
       const saveRoundScore = (roundIdx) => {
@@ -235,6 +237,10 @@
         });
         
         setScores(newScores);
+        
+        // Immediately save to localStorage
+        localStorage.setItem('padelScores', JSON.stringify(newScores));
+        localStorage.setItem('padelRoundScores', JSON.stringify(roundScores));
       };
 
       const resetScores = () => {
