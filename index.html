@@ -453,10 +453,10 @@
                 </div>
                 <div class="fixed-points-options" id="fixedPointsOptions" style="display: none;">
                     <label>Total Points Per Game: 
-                        <input type="number" id="totalPointsInput" value="6" min="1">
+                        <input type="number" id="totalPointsInput" value="16" min="1">
                     </label>
                     <div class="info-text">
-                        When you enter Team 1 score, Team 2 auto-calculates. (e.g., Total=6, Team 1=4 → Team 2=2)
+                        When you enter Team 1 score, Team 2 auto-calculates. (e.g., Total=16, Team 1=10 → Team 2=6)
                     </div>
                 </div>
             </div>
@@ -590,7 +590,7 @@
             playerCount: 6,
             playerNames: [],
             fixedPoints: false,
-            totalPoints: 6,
+            totalPoints: 16,
             scores: [],
             tournamentStarted: false
         };
@@ -687,7 +687,7 @@
             
             // Get fixed points setting
             state.fixedPoints = document.getElementById('fixedPointsCheckbox').checked;
-            state.totalPoints = parseInt(document.getElementById('totalPointsInput').value) || 6;
+            state.totalPoints = parseInt(document.getElementById('totalPointsInput').value) || 16;
             
             // Initialize scores array if empty
             if (state.scores.length === 0) {
