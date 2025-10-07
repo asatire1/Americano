@@ -1,608 +1,917 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Americano Padel Tournament</title>
-  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Americano Padel Tournament</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #3B82F6 0%, #6366F1 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            color: #1F2937;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #6B7280;
+            font-size: 15px;
+        }
+
+        .tab-nav {
+            background: white;
+            border-radius: 12px;
+            padding: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 10px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 14px 20px;
+            border: none;
+            background: #F3F4F6;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.3s;
+            color: #6B7280;
+        }
+
+        .tab.active {
+            background: #3B82F6;
+            color: white;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .section {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #1F2937;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .player-count-buttons {
+            display: flex;
+            gap: 12px;
+            margin: 16px 0;
+            flex-wrap: wrap;
+        }
+
+        .player-count-btn {
+            padding: 12px 24px;
+            cursor: pointer;
+            border: 2px solid #E5E7EB;
+            background: white;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+            color: #6B7280;
+        }
+
+        .player-count-btn:hover {
+            border-color: #3B82F6;
+            background: #EFF6FF;
+        }
+
+        .player-count-btn.active {
+            background: #3B82F6;
+            color: white;
+            border-color: #3B82F6;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+        }
+
+        .player-inputs {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .player-input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .player-input-group label {
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #374151;
+            font-size: 14px;
+        }
+
+        .player-input-group input {
+            padding: 12px;
+            border: 2px solid #E5E7EB;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: border-color 0.3s;
+        }
+
+        .player-input-group input:focus {
+            outline: none;
+            border-color: #3B82F6;
+        }
+
+        .checkbox-group {
+            margin: 20px 0;
+        }
+
+        .checkbox-group label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .fixed-points-options {
+            margin-top: 16px;
+            padding: 20px;
+            border: 2px solid #E5E7EB;
+            background: #F9FAFB;
+            border-radius: 8px;
+        }
+
+        .fixed-points-options label {
+            display: block;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        .fixed-points-options input[type="number"] {
+            width: 100px;
+            padding: 10px;
+            border: 2px solid #E5E7EB;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+
+        .start-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #10B981, #059669);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 700;
+            margin-top: 20px;
+            border-radius: 8px;
+            transition: transform 0.2s;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .start-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+        }
+
+        .backup-buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .backup-buttons button {
+            padding: 12px 20px;
+            cursor: pointer;
+            border: 2px solid #E5E7EB;
+            background: white;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s;
+            color: #374151;
+        }
+
+        .backup-buttons button:hover {
+            background: #F3F4F6;
+            border-color: #3B82F6;
+        }
+
+        .leaderboard-item {
+            padding: 16px;
+            border-bottom: 2px solid #F3F4F6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.2s;
+        }
+
+        .leaderboard-item:hover {
+            background: #F9FAFB;
+        }
+
+        .leaderboard-item:last-child {
+            border-bottom: none;
+        }
+
+        .leaderboard-item span:first-child {
+            font-weight: 600;
+            color: #1F2937;
+            font-size: 16px;
+        }
+
+        .leaderboard-item span:last-child {
+            font-size: 24px;
+            font-weight: 700;
+            color: #3B82F6;
+        }
+
+        .round-section {
+            border: 2px solid #E5E7EB;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 12px;
+            background: #FAFAFA;
+        }
+
+        .round-title {
+            font-weight: 700;
+            font-size: 18px;
+            margin-bottom: 16px;
+            color: #1F2937;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #E5E7EB;
+        }
+
+        .match {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin-bottom: 12px;
+        }
+
+        .team {
+            border: 2px solid #E5E7EB;
+            padding: 16px;
+            border-radius: 8px;
+            background: white;
+        }
+
+        .team-players {
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #1F2937;
+            font-size: 15px;
+        }
+
+        .score-input {
+            width: 80px;
+            padding: 10px;
+            margin-top: 8px;
+            border: 2px solid #E5E7EB;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .score-input:focus {
+            outline: none;
+            border-color: #3B82F6;
+        }
+
+        .score-input[readonly] {
+            background: #F3F4F6;
+            cursor: not-allowed;
+        }
+
+        .resting {
+            margin: 16px 0 0 0;
+            font-style: italic;
+            color: #6B7280;
+            padding: 12px;
+            background: #FEF3C7;
+            border-radius: 6px;
+            border-left: 4px solid #F59E0B;
+        }
+
+        .reset-btn {
+            padding: 12px 20px;
+            background: #EF4444;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+        }
+
+        .reset-btn:hover {
+            background: #DC2626;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+        }
+
+        .info-text {
+            color: #6B7280;
+            font-size: 14px;
+            margin-top: 12px;
+            padding: 12px;
+            background: #EFF6FF;
+            border-radius: 6px;
+            border-left: 4px solid #3B82F6;
+        }
+
+        .auto-save-notice {
+            background: linear-gradient(135deg, #10B981, #059669);
+            padding: 20px;
+            border: none;
+            text-align: center;
+            color: white;
+            border-radius: 12px;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        input[type="number"] {
+            padding: 10px;
+            border: 2px solid #E5E7EB;
+            border-radius: 6px;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        @media (max-width: 640px) {
+            .header h1 {
+                font-size: 24px;
+            }
+            
+            .tab-nav {
+                flex-direction: column;
+            }
+            
+            .player-count-buttons {
+                justify-content: center;
+            }
+            
+            .match {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div id="root"></div>
-
-  <script type="text/babel">
-    const { useState, useEffect } = React;
-
-    const Trophy = ({ size = 24, className = "" }) => (
-      <svg width={size} height={size} className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18M4 22h16M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22M18 2H6v7a6 6 0 0 0 12 0V2Z"/>
-      </svg>
-    );
-
-    const Users = ({ size = 24, className = "" }) => (
-      <svg width={size} height={size} className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
-      </svg>
-    );
-
-    const Award = ({ size = 24, className = "" }) => (
-      <svg width={size} height={size} className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/>
-      </svg>
-    );
-
-    const Settings = ({ size = 24, className = "" }) => (
-      <svg width={size} height={size} className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>
-      </svg>
-    );
-
-    const AmericanoTournament = () => {
-      // Load initial state from localStorage
-      const [numPlayers, setNumPlayers] = useState(() => {
-        const saved = localStorage.getItem('padelNumPlayers');
-        return saved ? parseInt(saved) : 6;
-      });
-      
-      const [players, setPlayers] = useState(() => {
-        const saved = localStorage.getItem('padelPlayers');
-        if (saved) {
-          try {
-            return JSON.parse(saved);
-          } catch (e) {
-            console.error('Error loading players:', e);
-          }
-        }
-        return Array.from({ length: 6 }, (_, i) => `Player ${i + 1}`);
-      });
-      
-      const [tournamentStarted, setTournamentStarted] = useState(() => {
-        const saved = localStorage.getItem('padelTournamentStarted');
-        return saved === 'true';
-      });
-
-      const [fixedPoints, setFixedPoints] = useState(() => {
-        const saved = localStorage.getItem('padelFixedPoints');
-        return saved === 'true';
-      });
-
-      const [pointsPerGame, setPointsPerGame] = useState(() => {
-        const saved = localStorage.getItem('padelPointsPerGame');
-        return saved ? parseInt(saved) : 6;
-      });
-
-      const [activeTab, setActiveTab] = useState(() => {
-        const saved = localStorage.getItem('padelActiveTab');
-        const tournamentSaved = localStorage.getItem('padelTournamentStarted');
-        if (tournamentSaved === 'true') {
-          return 'tournament';
-        }
-        return saved || 'settings';
-      });
-
-      const [scores, setScores] = useState(() => {
-        const saved = localStorage.getItem('padelScores');
-        if (saved) {
-          try {
-            return JSON.parse(saved);
-          } catch (e) {
-            console.error('Error loading scores:', e);
-          }
-        }
-        return Array(6).fill(0);
-      });
-      
-      const [roundScores, setRoundScores] = useState(() => {
-        const saved = localStorage.getItem('padelRoundScores');
-        if (saved) {
-          try {
-            return JSON.parse(saved);
-          } catch (e) {
-            console.error('Error loading round scores:', e);
-          }
-        }
-        return [];
-      });
-      
-      const configs = {
-        5: { rounds: 5, gamesPerPlayer: '4', balance: 'Perfect' },
-        6: { rounds: 12, gamesPerPlayer: '8', balance: 'Perfect' },
-        7: { rounds: 15, gamesPerPlayer: '8-9', balance: 'Normalized' },
-        8: { rounds: 14, gamesPerPlayer: '7', balance: 'Perfect' },
-        9: { rounds: 17, gamesPerPlayer: '7-8', balance: 'Normalized' }
-      };
-
-      const generateSchedule = (n) => {
-        const schedules = {
-          5: [
-            { teams: [[0, 1], [2, 3]], resting: [4] },
-            { teams: [[0, 2], [3, 4]], resting: [1] },
-            { teams: [[0, 3], [1, 4]], resting: [2] },
-            { teams: [[0, 4], [1, 2]], resting: [3] },
-            { teams: [[1, 3], [2, 4]], resting: [0] }
-          ],
-          6: [
-            { teams: [[0, 1], [2, 3]], resting: [4, 5] },
-            { teams: [[4, 5], [0, 2]], resting: [1, 3] },
-            { teams: [[1, 3], [0, 5]], resting: [2, 4] },
-            { teams: [[2, 5], [1, 4]], resting: [0, 3] },
-            { teams: [[0, 3], [2, 4]], resting: [1, 5] },
-            { teams: [[1, 5], [3, 4]], resting: [0, 2] },
-            { teams: [[0, 5], [1, 2]], resting: [3, 4] },
-            { teams: [[3, 5], [2, 4]], resting: [0, 1] },
-            { teams: [[0, 2], [1, 3]], resting: [4, 5] },
-            { teams: [[0, 4], [2, 3]], resting: [1, 5] },
-            { teams: [[1, 4], [3, 5]], resting: [0, 2] },
-            { teams: [[0, 1], [4, 5]], resting: [2, 3] }
-          ],
-          7: [
-            { teams: [[0, 1], [2, 3]], resting: [4, 5, 6] },
-            { teams: [[0, 2], [3, 4]], resting: [1, 5, 6] },
-            { teams: [[0, 3], [4, 5]], resting: [1, 2, 6] },
-            { teams: [[0, 4], [5, 6]], resting: [1, 2, 3] },
-            { teams: [[0, 5], [1, 2]], resting: [3, 4, 6] },
-            { teams: [[0, 6], [1, 3]], resting: [2, 4, 5] },
-            { teams: [[1, 4], [2, 5]], resting: [0, 3, 6] },
-            { teams: [[1, 5], [3, 6]], resting: [0, 2, 4] },
-            { teams: [[1, 6], [4, 5]], resting: [0, 2, 3] },
-            { teams: [[2, 4], [3, 5]], resting: [0, 1, 6] },
-            { teams: [[2, 6], [3, 4]], resting: [0, 1, 5] },
-            { teams: [[4, 6], [2, 3]], resting: [0, 1, 5] },
-            { teams: [[5, 6], [1, 2]], resting: [0, 3, 4] },
-            { teams: [[0, 1], [3, 5]], resting: [2, 4, 6] },
-            { teams: [[0, 2], [4, 6]], resting: [1, 3, 5] }
-          ],
-          8: [
-            { teams: [[0, 1], [2, 3]], resting: [4, 5, 6, 7] },
-            { teams: [[0, 2], [4, 5]], resting: [1, 3, 6, 7] },
-            { teams: [[0, 3], [6, 7]], resting: [1, 2, 4, 5] },
-            { teams: [[0, 4], [1, 5]], resting: [2, 3, 6, 7] },
-            { teams: [[0, 5], [2, 6]], resting: [1, 3, 4, 7] },
-            { teams: [[0, 6], [3, 7]], resting: [1, 2, 4, 5] },
-            { teams: [[0, 7], [1, 4]], resting: [2, 3, 5, 6] },
-            { teams: [[1, 2], [3, 4]], resting: [0, 5, 6, 7] },
-            { teams: [[1, 3], [5, 6]], resting: [0, 2, 4, 7] },
-            { teams: [[1, 6], [4, 7]], resting: [0, 2, 3, 5] },
-            { teams: [[1, 7], [2, 5]], resting: [0, 3, 4, 6] },
-            { teams: [[2, 4], [5, 7]], resting: [0, 1, 3, 6] },
-            { teams: [[2, 7], [3, 6]], resting: [0, 1, 4, 5] },
-            { teams: [[3, 5], [4, 6]], resting: [0, 1, 2, 7] }
-          ],
-          9: [
-            { teams: [[0, 1], [2, 3]], resting: [4, 5, 6, 7, 8] },
-            { teams: [[0, 2], [5, 7]], resting: [1, 3, 4, 6, 8] },
-            { teams: [[0, 3], [6, 7]], resting: [1, 2, 4, 5, 8] },
-            { teams: [[0, 4], [1, 6]], resting: [2, 3, 5, 7, 8] },
-            { teams: [[0, 5], [2, 8]], resting: [1, 3, 4, 6, 7] },
-            { teams: [[0, 6], [3, 4]], resting: [1, 2, 5, 7, 8] },
-            { teams: [[0, 7], [5, 8]], resting: [1, 2, 3, 4, 6] },
-            { teams: [[0, 8], [1, 7]], resting: [2, 3, 4, 5, 6] },
-            { teams: [[1, 2], [4, 6]], resting: [0, 3, 5, 7, 8] },
-            { teams: [[1, 3], [4, 8]], resting: [0, 2, 5, 6, 7] },
-            { teams: [[1, 4], [2, 7]], resting: [0, 3, 5, 6, 8] },
-            { teams: [[1, 5], [3, 7]], resting: [0, 2, 4, 6, 8] },
-            { teams: [[1, 8], [5, 6]], resting: [0, 2, 3, 4, 7] },
-            { teams: [[2, 4], [3, 8]], resting: [0, 1, 5, 6, 7] },
-            { teams: [[2, 5], [4, 7]], resting: [0, 1, 3, 6, 8] },
-            { teams: [[2, 6], [7, 8]], resting: [0, 1, 3, 4, 5] },
-            { teams: [[3, 5], [6, 8]], resting: [0, 1, 2, 4, 7] }
-          ]
-        };
-        return schedules[n] || schedules[6];
-      };
-
-      const rounds = generateSchedule(numPlayers);
-
-      // Initialize roundScores if empty
-      useEffect(() => {
-        if (roundScores.length === 0 || roundScores.length !== rounds.length) {
-          const newRoundScores = rounds.map(() => ({ team1: '', team2: '' }));
-          setRoundScores(newRoundScores);
-        }
-      }, [rounds.length]);
-
-      // Auto-save to localStorage
-      useEffect(() => {
-        localStorage.setItem('padelNumPlayers', numPlayers.toString());
-      }, [numPlayers]);
-
-      useEffect(() => {
-        localStorage.setItem('padelPlayers', JSON.stringify(players));
-      }, [players]);
-
-      useEffect(() => {
-        localStorage.setItem('padelScores', JSON.stringify(scores));
-      }, [scores]);
-
-      useEffect(() => {
-        localStorage.setItem('padelRoundScores', JSON.stringify(roundScores));
-      }, [roundScores]);
-
-      useEffect(() => {
-        localStorage.setItem('padelActiveTab', activeTab);
-      }, [activeTab]);
-
-      useEffect(() => {
-        localStorage.setItem('padelTournamentStarted', tournamentStarted.toString());
-      }, [tournamentStarted]);
-
-      const handleNameChange = (idx, newName) => {
-        const newPlayers = [...players];
-        newPlayers[idx] = newName;
-        setPlayers(newPlayers);
-      };
-
-      const handlePlayerCountChange = (newCount) => {
-        if (confirm('Changing player count will reset all scores. Continue?')) {
-          setNumPlayers(newCount);
-          const newPlayers = Array.from({ length: newCount }, (_, i) => `Player ${i + 1}`);
-          setPlayers(newPlayers);
-          setScores(Array(newCount).fill(0));
-          const newRounds = generateSchedule(newCount);
-          setRoundScores(newRounds.map(() => ({ team1: '', team2: '' })));
-          setTournamentStarted(false);
-          setActiveTab('settings');
-        }
-      };
-
-      const handleScoreChange = (roundIdx, team, value) => {
-        const newRoundScores = [...roundScores];
-        newRoundScores[roundIdx] = { ...newRoundScores[roundIdx], [team]: value };
-        setRoundScores(newRoundScores);
-      };
-
-      const saveRoundScore = (roundIdx) => {
-        const round = rounds[roundIdx];
-        const team1Score = parseInt(roundScores[roundIdx].team1) || 0;
-        const team2Score = parseInt(roundScores[roundIdx].team2) || 0;
-        
-        if (team1Score === 0 && team2Score === 0) return;
-
-        const newScores = [...scores];
-        
-        round.teams[0].forEach(playerIdx => {
-          newScores[playerIdx] += team1Score;
-        });
-        round.teams[1].forEach(playerIdx => {
-          newScores[playerIdx] += team2Score;
-        });
-        
-        setScores(newScores);
-      };
-
-      const resetScores = () => {
-        if (confirm('Reset all scores? This cannot be undone.')) {
-          setScores(Array(numPlayers).fill(0));
-          setRoundScores(rounds.map(() => ({ team1: '', team2: '' })));
-        }
-      };
-
-      const clearAllData = () => {
-        if (confirm('Are you sure you want to clear ALL saved data and start fresh?')) {
-          localStorage.clear();
-          window.location.reload();
-        }
-      };
-
-      const downloadProgress = () => {
-        const tournamentData = {
-          numPlayers,
-          players,
-          scores,
-          roundScores,
-          tournamentStarted,
-          timestamp: new Date().toISOString()
-        };
-        
-        const dataStr = JSON.stringify(tournamentData, null, 2);
-        const dataBlob = new Blob([dataStr], { type: 'application/json' });
-        const url = URL.createObjectURL(dataBlob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `padel-tournament-${new Date().toISOString().split('T')[0]}.json`;
-        link.click();
-        URL.revokeObjectURL(url);
-      };
-
-      const uploadProgress = (event) => {
-        const file = event.target.files[0];
-        if (!file) return;
-        
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          try {
-            const data = JSON.parse(e.target.result);
-            setNumPlayers(data.numPlayers);
-            setPlayers(data.players);
-            setScores(data.scores);
-            setRoundScores(data.roundScores);
-            setTournamentStarted(data.tournamentStarted);
-            alert('Tournament restored successfully!');
-          } catch (error) {
-            alert('Error loading file. Please use a valid save file.');
-          }
-        };
-        reader.readAsText(file);
-      };
-
-      const startTournament = () => {
-        setTournamentStarted(true);
-        setActiveTab('tournament');
-      };
-
-      function getNormalizedScore(playerIdx) {
-        if (numPlayers !== 7 && numPlayers !== 9) return scores[playerIdx];
-        
-        const gamesPlayed = rounds.filter(round => 
-          round.teams[0].includes(playerIdx) || round.teams[1].includes(playerIdx)
-        ).length;
-        
-        const allGames = players.map((_, idx) => 
-          rounds.filter(round => 
-            round.teams[0].includes(idx) || round.teams[1].includes(idx)
-          ).length
-        );
-        const minGames = Math.min(...allGames);
-        
-        return scores[playerIdx] * (minGames / gamesPlayed);
-      }
-
-      const sortedPlayers = players
-        .map((name, idx) => ({ 
-          name, 
-          score: scores[idx], 
-          idx,
-          normalizedScore: getNormalizedScore(idx)
-        }))
-        .sort((a, b) => b.normalizedScore - a.normalizedScore);
-
-      return (
-        <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 p-4 md:p-8">
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-8">
-              <div className="flex items-center justify-center gap-3 mb-2">
-                <Trophy size={40} className="text-yellow-500" />
-                <h1 className="text-3xl md:text-4xl font-bold text-gray-800">Americano Padel Tournament</h1>
-              </div>
-              <p className="text-gray-600">
-                {numPlayers} Players • {configs[numPlayers].rounds} Rounds • Auto-saved!
-              </p>
-            </div>
-
-            <div className="flex gap-2 mb-6">
-              <button
-                onClick={() => setActiveTab('settings')}
-                className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-colors ${
-                  activeTab === 'settings'
-                    ? 'bg-blue-600 text-white shadow-lg'
-                    : 'bg-white text-gray-700 hover:bg-gray-100'
-                }`}
-              >
-                <Settings size={20} />
-                Settings
-              </button>
-              <button
-                onClick={() => setActiveTab('tournament')}
-                disabled={!tournamentStarted}
-                className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-colors ${
-                  activeTab === 'tournament'
-                    ? 'bg-blue-600 text-white shadow-lg'
-                    : tournamentStarted 
-                      ? 'bg-white text-gray-700 hover:bg-gray-100'
-                      : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                }`}
-              >
-                <Trophy size={20} />
-                Tournament
-              </button>
-            </div>
-
-            {activeTab === 'settings' && (
-              <div className="space-y-6">
-                <div className="bg-white rounded-lg shadow-lg p-6">
-                  <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                    <Users size={24} className="text-blue-600" />
-                    Tournament Setup
-                  </h2>
-                  
-                  <div className="mb-6">
-                    <label className="block text-sm font-medium text-gray-700 mb-3">
-                      Number of Players
-                    </label>
-                    <div className="flex gap-2">
-                      {[5, 6, 7, 8, 9].map(n => (
-                        <button
-                          key={n}
-                          onClick={() => handlePlayerCountChange(n)}
-                          className={`flex-1 px-4 py-3 rounded-lg font-semibold transition-colors ${
-                            numPlayers === n
-                              ? 'bg-blue-600 text-white shadow-lg'
-                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                          }`}
-                        >
-                          {n}
-                        </button>
-                      ))}
-                    </div>
-                    <div className="mt-3 p-3 bg-blue-50 rounded-lg">
-                      <p className="text-sm text-blue-800">
-                        <strong>{configs[numPlayers].rounds} rounds</strong> • 
-                        <strong> {configs[numPlayers].gamesPerPlayer} games</strong> per player • 
-                        <strong> All partnerships covered!</strong>
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-white rounded-lg shadow-lg p-6">
-                  <h2 className="text-xl font-semibold mb-4">Player Names</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {players.map((player, idx) => (
-                      <div key={idx} className="bg-blue-50 rounded-lg p-4">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Player {idx + 1}
-                        </label>
-                        <input
-                          type="text"
-                          value={player}
-                          onChange={(e) => handleNameChange(idx, e.target.value)}
-                          className="w-full px-4 py-3 border-2 border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <button
-                  onClick={startTournament}
-                  className="w-full bg-green-600 text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-green-700 transition-colors shadow-lg"
-                >
-                  Start Tournament →
-                </button>
-
-                <div className="bg-white border-2 border-blue-300 rounded-lg p-6">
-                  <h3 className="font-semibold text-gray-900 mb-4">💾 Backup & Data</h3>
-                  <div className="space-y-3">
-                    <div className="flex gap-3">
-                      <button
-                        onClick={downloadProgress}
-                        className="flex-1 bg-green-600 text-white px-4 py-3 rounded-lg font-medium hover:bg-green-700"
-                      >
-                        📥 Download Backup
-                      </button>
-                      <label className="flex-1">
-                        <input
-                          type="file"
-                          accept=".json"
-                          onChange={uploadProgress}
-                          className="hidden"
-                        />
-                        <div className="bg-blue-600 text-white px-4 py-3 rounded-lg font-medium hover:bg-blue-700 text-center cursor-pointer">
-                          📤 Upload Backup
-                        </div>
-                      </label>
-                    </div>
-                    <button
-                      onClick={clearAllData}
-                      className="w-full bg-red-500 text-white px-4 py-3 rounded-lg font-medium hover:bg-red-600"
-                    >
-                      🗑️ Clear All Data
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'tournament' && tournamentStarted && (
-              <>
-                <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-                  <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                    <Award size={24} className="text-yellow-600" />
-                    Leaderboard
-                  </h2>
-                  <div className="space-y-2">
-                    {sortedPlayers.map((player, position) => (
-                      <div 
-                        key={player.idx}
-                        className={`flex items-center justify-between p-3 rounded-lg ${
-                          position === 0 ? 'bg-yellow-100 border-2 border-yellow-400' :
-                          position === 1 ? 'bg-gray-100 border-2 border-gray-400' :
-                          position === 2 ? 'bg-orange-100 border-2 border-orange-400' :
-                          'bg-gray-50'
-                        }`}
-                      >
-                        <div className="flex items-center gap-3">
-                          <span className="font-bold text-lg w-8">{position + 1}.</span>
-                          <span className="font-medium">{player.name}</span>
-                        </div>
-                        <div className="text-right">
-                          <span className="text-xl font-bold text-blue-600">
-                            {(numPlayers === 7 || numPlayers === 9) ? player.normalizedScore.toFixed(1) : player.score}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <button
-                    onClick={resetScores}
-                    className="mt-4 w-full bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-                  >
-                    Reset All Scores
-                  </button>
-                </div>
-
-                <div className="bg-white rounded-lg shadow-lg p-6">
-                  <h2 className="text-xl font-semibold mb-4">Match Schedule</h2>
-                  <div className="space-y-4">
-                    {rounds.map((round, idx) => (
-                      <div 
-                        key={idx}
-                        className="border-2 rounded-lg p-4 bg-gray-50"
-                      >
-                        <div className="font-bold text-lg mb-3">Round {idx + 1}</div>
-                        
-                        <div className="grid md:grid-cols-2 gap-4 mb-3">
-                          <div className="bg-white rounded p-3">
-                            <div className="font-semibold text-blue-600 mb-2">
-                              {players[round.teams[0][0]]} & {players[round.teams[0][1]]}
-                            </div>
-                            <input
-                              type="number"
-                              min="0"
-                              placeholder="Score"
-                              value={roundScores[idx]?.team1 || ''}
-                              onChange={(e) => handleScoreChange(idx, 'team1', e.target.value)}
-                              className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            />
-                          </div>
-                          
-                          <div className="bg-white rounded p-3">
-                            <div className="font-semibold text-green-600 mb-2">
-                              {players[round.teams[1][0]]} & {players[round.teams[1][1]]}
-                            </div>
-                            <input
-                              type="number"
-                              min="0"
-                              placeholder="Score"
-                              value={roundScores[idx]?.team2 || ''}
-                              onChange={(e) => handleScoreChange(idx, 'team2', e.target.value)}
-                              className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
-                            />
-                          </div>
-                        </div>
-
-                        <div className="flex items-center justify-between">
-                          <div className="text-sm text-gray-600">
-                            <span className="font-semibold">Resting:</span> {round.resting.map(p => players[p]).join(', ')}
-                          </div>
-                          <button
-                            onClick={() => saveRoundScore(idx)}
-                            className="bg-blue-600 text-white px-6 py-2 rounded font-medium hover:bg-blue-700"
-                          >
-                            Save Score
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="mt-6 bg-green-100 border border-green-300 rounded-lg p-4">
-                  <h3 className="font-semibold text-green-900 mb-2">✅ Auto-Save Active!</h3>
-                  <p className="text-sm text-green-800">
-                    All changes save automatically. Close your browser and come back anytime!
-                  </p>
-                </div>
-              </>
-            )}
-          </div>
+    <div class="container">
+        <div class="header">
+            <h1>🏆 AMERICANO PADEL TOURNAMENT</h1>
+            <p id="headerInfo">Configure your tournament to get started</p>
         </div>
-      );
-    };
 
-    ReactDOM.render(<AmericanoTournament />, document.getElementById('root'));
-  </script>
+        <div class="tab-nav">
+            <button class="tab active" onclick="switchTab('settings')">⚙️ SETTINGS</button>
+            <button class="tab" onclick="switchTab('tournament')">🏆 TOURNAMENT</button>
+        </div>
+
+        <!-- SETTINGS PAGE -->
+        <div id="settings" class="page active">
+            <div class="section">
+                <div class="section-title">👥 Tournament Setup</div>
+                <label style="font-weight: 600; color: #374151; margin-bottom: 8px; display: block;">Number of Players:</label>
+                <div class="player-count-buttons">
+                    <button class="player-count-btn" onclick="setPlayerCount(5)">5</button>
+                    <button class="player-count-btn active" onclick="setPlayerCount(6)">6</button>
+                    <button class="player-count-btn" onclick="setPlayerCount(7)">7</button>
+                    <button class="player-count-btn" onclick="setPlayerCount(8)">8</button>
+                    <button class="player-count-btn" onclick="setPlayerCount(9)">9</button>
+                </div>
+                <div class="info-text" id="tournamentInfo">ℹ️ 12 rounds • 8 games per player • Perfect balance</div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">✏️ Player Names</div>
+                <div class="player-inputs" id="playerInputs">
+                    <!-- Generated dynamically -->
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">⚡ Scoring Options</div>
+                <div class="checkbox-group">
+                    <label>
+                        <input type="checkbox" id="fixedPointsCheckbox" onchange="toggleFixedPoints()">
+                        <span>Fixed Points Per Game</span>
+                    </label>
+                </div>
+                <div class="fixed-points-options" id="fixedPointsOptions" style="display: none;">
+                    <label>Total Points Per Game: 
+                        <input type="number" id="totalPointsInput" value="6" min="1">
+                    </label>
+                    <div class="info-text">
+                        When you enter Team 1 score, Team 2 auto-calculates. (e.g., Total=6, Team 1=4 → Team 2=2)
+                    </div>
+                </div>
+            </div>
+
+            <button class="start-btn" onclick="startTournament()">START TOURNAMENT →</button>
+
+            <div class="section">
+                <div class="section-title">💾 Backup & Data</div>
+                <div class="backup-buttons">
+                    <button onclick="downloadBackup()">📥 Download Backup</button>
+                    <button onclick="document.getElementById('uploadInput').click()">📤 Upload Backup</button>
+                    <button onclick="clearAllData()">🗑️ Clear All Data</button>
+                </div>
+                <input type="file" id="uploadInput" accept=".json" onchange="uploadBackup(event)">
+            </div>
+        </div>
+
+        <!-- TOURNAMENT PAGE -->
+        <div id="tournament" class="page">
+            <div class="section">
+                <div class="section-title">🏆 Leaderboard</div>
+                <div id="leaderboard">
+                    <!-- Generated dynamically -->
+                </div>
+                <button class="reset-btn" onclick="resetAllScores()" style="margin-top: 20px;">Reset All Scores</button>
+            </div>
+
+            <div class="section">
+                <div class="section-title">📋 Match Schedule</div>
+                <div id="matchSchedule">
+                    <!-- Generated dynamically -->
+                </div>
+            </div>
+
+            <div class="auto-save-notice">
+                ✅ Auto-Save Active!<br>
+                All changes save automatically. Close your browser and come back anytime!
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Fixtures data for different player counts
+        const FIXTURES = {
+            5: [
+                { teams: [[1,2],[3,4]], rest: [5] },
+                { teams: [[1,3],[4,5]], rest: [2] },
+                { teams: [[1,4],[2,5]], rest: [3] },
+                { teams: [[1,5],[2,3]], rest: [4] },
+                { teams: [[2,4],[3,5]], rest: [1] }
+            ],
+            6: [
+                { teams: [[1,2],[3,4]], rest: [5,6] },
+                { teams: [[5,6],[1,3]], rest: [2,4] },
+                { teams: [[2,4],[1,6]], rest: [3,5] },
+                { teams: [[3,6],[2,5]], rest: [1,4] },
+                { teams: [[1,4],[3,5]], rest: [2,6] },
+                { teams: [[2,6],[4,5]], rest: [1,3] },
+                { teams: [[1,6],[2,3]], rest: [4,5] },
+                { teams: [[4,6],[3,5]], rest: [1,2] },
+                { teams: [[1,3],[2,4]], rest: [5,6] },
+                { teams: [[1,5],[3,4]], rest: [2,6] },
+                { teams: [[2,5],[4,6]], rest: [1,3] },
+                { teams: [[1,2],[5,6]], rest: [3,4] }
+            ],
+            7: [
+                { teams: [[1,2],[3,4]], rest: [5,6,7] },
+                { teams: [[1,3],[4,5]], rest: [2,6,7] },
+                { teams: [[1,4],[5,6]], rest: [2,3,7] },
+                { teams: [[1,5],[6,7]], rest: [2,3,4] },
+                { teams: [[1,6],[2,3]], rest: [4,5,7] },
+                { teams: [[1,7],[2,4]], rest: [3,5,6] },
+                { teams: [[2,5],[3,6]], rest: [1,4,7] },
+                { teams: [[2,6],[4,7]], rest: [1,3,5] },
+                { teams: [[2,7],[5,6]], rest: [1,3,4] },
+                { teams: [[3,5],[4,6]], rest: [1,2,7] },
+                { teams: [[3,7],[4,5]], rest: [1,2,6] },
+                { teams: [[5,7],[3,4]], rest: [1,2,6] },
+                { teams: [[6,7],[2,3]], rest: [1,4,5] },
+                { teams: [[1,2],[4,6]], rest: [3,5,7] },
+                { teams: [[1,3],[5,7]], rest: [2,4,6] }
+            ],
+            8: [
+                { teams: [[1,2],[3,4]], rest: [5,6,7,8] },
+                { teams: [[1,3],[5,6]], rest: [2,4,7,8] },
+                { teams: [[1,4],[7,8]], rest: [2,3,5,6] },
+                { teams: [[1,5],[2,6]], rest: [3,4,7,8] },
+                { teams: [[1,6],[3,7]], rest: [2,4,5,8] },
+                { teams: [[1,7],[4,8]], rest: [2,3,5,6] },
+                { teams: [[1,8],[2,5]], rest: [3,4,6,7] },
+                { teams: [[2,3],[4,5]], rest: [1,6,7,8] },
+                { teams: [[2,4],[6,7]], rest: [1,3,5,8] },
+                { teams: [[2,7],[5,8]], rest: [1,3,4,6] },
+                { teams: [[2,8],[3,6]], rest: [1,4,5,7] },
+                { teams: [[3,5],[6,8]], rest: [1,2,4,7] },
+                { teams: [[3,8],[4,7]], rest: [1,2,5,6] },
+                { teams: [[4,6],[5,7]], rest: [1,2,3,8] }
+            ],
+            9: [
+                { teams: [[1,2],[3,4]], rest: [5,6,7,8,9] },
+                { teams: [[1,3],[6,8]], rest: [2,4,5,7,9] },
+                { teams: [[1,4],[7,8]], rest: [2,3,5,6,9] },
+                { teams: [[1,5],[2,7]], rest: [3,4,6,8,9] },
+                { teams: [[1,6],[3,9]], rest: [2,4,5,7,8] },
+                { teams: [[1,7],[4,5]], rest: [2,3,6,8,9] },
+                { teams: [[1,8],[6,9]], rest: [2,3,4,5,7] },
+                { teams: [[1,9],[2,8]], rest: [3,4,5,6,7] },
+                { teams: [[2,3],[5,7]], rest: [1,4,6,8,9] },
+                { teams: [[2,4],[5,9]], rest: [1,3,6,7,8] },
+                { teams: [[2,5],[3,8]], rest: [1,4,6,7,9] },
+                { teams: [[2,6],[4,8]], rest: [1,3,5,7,9] },
+                { teams: [[2,9],[6,7]], rest: [1,3,4,5,8] },
+                { teams: [[3,5],[4,9]], rest: [1,2,6,7,8] },
+                { teams: [[3,6],[5,8]], rest: [1,2,4,7,9] },
+                { teams: [[3,7],[8,9]], rest: [1,2,4,5,6] },
+                { teams: [[4,6],[7,9]], rest: [1,2,3,5,8] }
+            ]
+        };
+
+        // Tournament info by player count
+        const TOURNAMENT_INFO = {
+            5: { rounds: 5, gamesPerPlayer: 4 },
+            6: { rounds: 12, gamesPerPlayer: 8 },
+            7: { rounds: 15, gamesPerPlayer: 10 },
+            8: { rounds: 14, gamesPerPlayer: 7 },
+            9: { rounds: 17, gamesPerPlayer: 8 }
+        };
+
+        // State
+        let state = {
+            playerCount: 6,
+            playerNames: [],
+            fixedPoints: false,
+            totalPoints: 6,
+            scores: [],
+            tournamentStarted: false
+        };
+
+        // Initialize
+        function init() {
+            loadState();
+            setPlayerCount(state.playerCount);
+            if (state.tournamentStarted) {
+                switchTab('tournament');
+                renderTournament();
+            }
+        }
+
+        // Save state to localStorage
+        function saveState() {
+            localStorage.setItem('americanoPadelTournament', JSON.stringify(state));
+        }
+
+        // Load state from localStorage
+        function loadState() {
+            const saved = localStorage.getItem('americanoPadelTournament');
+            if (saved) {
+                state = JSON.parse(saved);
+                if (state.fixedPoints) {
+                    document.getElementById('fixedPointsCheckbox').checked = true;
+                    document.getElementById('fixedPointsOptions').style.display = 'block';
+                    document.getElementById('totalPointsInput').value = state.totalPoints;
+                }
+            }
+        }
+
+        // Set player count
+        function setPlayerCount(count) {
+            state.playerCount = count;
+            
+            // Update button states
+            document.querySelectorAll('.player-count-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (parseInt(btn.textContent) === count) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // Update info
+            const info = TOURNAMENT_INFO[count];
+            document.getElementById('tournamentInfo').textContent = 
+                `ℹ️ ${info.rounds} rounds • ${info.gamesPerPlayer} games per player • Perfect balance`;
+            
+            // Generate player inputs
+            generatePlayerInputs();
+            saveState();
+        }
+
+        // Generate player input fields
+        function generatePlayerInputs() {
+            const container = document.getElementById('playerInputs');
+            container.innerHTML = '';
+            
+            for (let i = 0; i < state.playerCount; i++) {
+                const group = document.createElement('div');
+                group.className = 'player-input-group';
+                
+                const label = document.createElement('label');
+                label.textContent = `Player ${i + 1}:`;
+                
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.value = state.playerNames[i] || `Player ${i + 1}`;
+                input.onchange = (e) => {
+                    state.playerNames[i] = e.target.value;
+                    saveState();
+                };
+                
+                group.appendChild(label);
+                group.appendChild(input);
+                container.appendChild(group);
+            }
+        }
+
+        // Toggle fixed points
+        function toggleFixedPoints() {
+            state.fixedPoints = document.getElementById('fixedPointsCheckbox').checked;
+            document.getElementById('fixedPointsOptions').style.display = 
+                state.fixedPoints ? 'block' : 'none';
+            saveState();
+        }
+
+        // Start tournament
+        function startTournament() {
+            // Collect player names
+            const inputs = document.querySelectorAll('#playerInputs input');
+            state.playerNames = Array.from(inputs).map(input => input.value || input.placeholder);
+            
+            // Get fixed points setting
+            state.fixedPoints = document.getElementById('fixedPointsCheckbox').checked;
+            state.totalPoints = parseInt(document.getElementById('totalPointsInput').value) || 6;
+            
+            // Initialize scores array if empty
+            if (state.scores.length === 0) {
+                const fixtures = FIXTURES[state.playerCount];
+                state.scores = fixtures.map(() => ({ team1: null, team2: null }));
+            }
+            
+            state.tournamentStarted = true;
+            saveState();
+            
+            // Update header
+            const info = TOURNAMENT_INFO[state.playerCount];
+            document.getElementById('headerInfo').textContent = 
+                `${state.playerCount} Players • ${info.rounds} Rounds • Auto-saved!`;
+            
+            // Switch to tournament tab
+            switchTab('tournament');
+            renderTournament();
+        }
+
+        // Switch tabs
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            
+            if (tab === 'settings') {
+                document.querySelectorAll('.tab')[0].classList.add('active');
+            } else {
+                document.querySelectorAll('.tab')[1].classList.add('active');
+            }
+            document.getElementById(tab).classList.add('active');
+        }
+
+        // Render tournament
+        function renderTournament() {
+            renderLeaderboard();
+            renderMatchSchedule();
+        }
+
+        // Calculate player scores
+        function calculatePlayerScores() {
+            const playerScores = Array(state.playerCount).fill(0);
+            const fixtures = FIXTURES[state.playerCount];
+            
+            fixtures.forEach((fixture, roundIndex) => {
+                const score = state.scores[roundIndex];
+                if (score.team1 !== null && score.team2 !== null) {
+                    // Team 1 players
+                    fixture.teams[0].forEach(playerNum => {
+                        playerScores[playerNum - 1] += score.team1;
+                    });
+                    // Team 2 players
+                    fixture.teams[1].forEach(playerNum => {
+                        playerScores[playerNum - 1] += score.team2;
+                    });
+                }
+            });
+            
+            return playerScores;
+        }
+
+        // Render leaderboard
+        function renderLeaderboard() {
+            const container = document.getElementById('leaderboard');
+            const playerScores = calculatePlayerScores();
+            
+            // Create array of players with scores
+            const players = state.playerNames.map((name, index) => ({
+                name,
+                score: playerScores[index],
+                index
+            }));
+            
+            // Sort by score descending
+            players.sort((a, b) => b.score - a.score);
+            
+            // Render
+            container.innerHTML = '';
+            players.forEach((player, rank) => {
+                const item = document.createElement('div');
+                item.className = 'leaderboard-item';
+                
+                let medal = '';
+                if (rank === 0) medal = '🥇 ';
+                else if (rank === 1) medal = '🥈 ';
+                else if (rank === 2) medal = '🥉 ';
+                
+                item.innerHTML = `
+                    <span>${medal}${rank + 1}. ${player.name}</span>
+                    <span>${player.score}</span>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        // Render match schedule
+        function renderMatchSchedule() {
+            const container = document.getElementById('matchSchedule');
+            const fixtures = FIXTURES[state.playerCount];
+            
+            container.innerHTML = '';
+            
+            fixtures.forEach((fixture, roundIndex) => {
+                const roundDiv = document.createElement('div');
+                roundDiv.className = 'round-section';
+                
+                const title = document.createElement('div');
+                title.className = 'round-title';
+                title.textContent = `Round ${roundIndex + 1}`;
+                roundDiv.appendChild(title);
+                
+                // Match
+                const matchDiv = document.createElement('div');
+                matchDiv.className = 'match';
+                
+                // Team 1
+                const team1Div = document.createElement('div');
+                team1Div.className = 'team';
+                const team1Players = fixture.teams[0].map(p => state.playerNames[p - 1]).join(' & ');
+                team1Div.innerHTML = `
+                    <div class="team-players">${team1Players}</div>
+                    <div>Score: <input type="number" class="score-input" id="score-${roundIndex}-team1" 
+                        value="${state.scores[roundIndex]?.team1 ?? ''}" 
+                        onchange="updateScore(${roundIndex}, 'team1', this.value)" min="0"></div>
+                `;
+                
+                // Team 2
+                const team2Div = document.createElement('div');
+                team2Div.className = 'team';
+                const team2Players = fixture.teams[1].map(p => state.playerNames[p - 1]).join(' & ');
+                team2Div.innerHTML = `
+                    <div class="team-players">${team2Players}</div>
+                    <div>Score: <input type="number" class="score-input" id="score-${roundIndex}-team2" 
+                        value="${state.scores[roundIndex]?.team2 ?? ''}" 
+                        ${state.fixedPoints ? 'readonly' : ''}
+                        onchange="updateScore(${roundIndex}, 'team2', this.value)" min="0">
+                        ${state.fixedPoints ? ' <span style="color: #6B7280; font-size: 13px;">(auto)</span>' : ''}</div>
+                `;
+                
+                matchDiv.appendChild(team1Div);
+                matchDiv.appendChild(team2Div);
+                roundDiv.appendChild(matchDiv);
+                
+                // Resting players
+                const restingDiv = document.createElement('div');
+                restingDiv.className = 'resting';
+                const restingPlayers = fixture.rest.map(p => state.playerNames[p - 1]).join(', ');
+                restingDiv.innerHTML = `⏸️ Resting: ${restingPlayers}`;
+                roundDiv.appendChild(restingDiv);
+                
+                container.appendChild(roundDiv);
+            });
+        }
+
+        // Update score
+        function updateScore(roundIndex, team, value) {
+            if (!state.scores[roundIndex]) {
+                state.scores[roundIndex] = { team1: null, team2: null };
+            }
+            
+            const numValue = value === '' ? null : parseInt(value);
+            state.scores[roundIndex][team] = numValue;
+            
+            // Auto-calculate other team if fixed points mode
+            if (state.fixedPoints && team === 'team1' && numValue !== null) {
+                state.scores[roundIndex].team2 = state.totalPoints - numValue;
+                document.getElementById(`score-${roundIndex}-team2`).value = state.scores[roundIndex].team2;
+            }
+            
+            saveState();
+            renderLeaderboard();
+        }
+
+        // Reset all scores
+        function resetAllScores() {
+            if (confirm('Are you sure you want to reset all scores? This cannot be undone.')) {
+                state.scores = FIXTURES[state.playerCount].map(() => ({ team1: null, team2: null }));
+                saveState();
+                renderTournament();
+            }
+        }
+
+        // Download backup
+        function downloadBackup() {
+            const dataStr = JSON.stringify(state, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `americano-tournament-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Upload backup
+        function uploadBackup(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    state = data;
+                    saveState();
+                    alert('Backup restored successfully!');
+                    location.reload();
+                } catch (error) {
+                    alert('Error loading backup file. Please check the file format.');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Clear all data
+        function clearAllData() {
+            if (confirm('Are you sure you want to clear all data? This cannot be undone.')) {
+                localStorage.removeItem('americanoPadelTournament');
+                location.reload();
+            }
+        }
+
+        // Initialize on load
+        init();
+    </script>
 </body>
 </html>
